@@ -18,23 +18,7 @@ namespace TestDapper
 		{
 			var host = CreateHostBuilder(args).Build();
 
-			using (var scope = host.Services.CreateScope())
-			{
-				var services = scope.ServiceProvider;
-				try
-				{
-					var context = services.GetRequiredService<MyContext>();
-					DatabaseInitializer.Initialize(context);
-
-					var context2 = services.GetRequiredService<manufacture_Context>();
-					DatabaseInitializer.Initialize(context2);
-				}
-				catch (Exception e)
-				{
-					/*var logger = services.GetRequiredService<ILogger<Program>>();
-					logger.LogError(e, "An error occurred while seeding the database.");*/
-				}
-			}
+		
 			host.Run();
 		}
 
