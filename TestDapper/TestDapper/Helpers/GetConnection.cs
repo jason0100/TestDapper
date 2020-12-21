@@ -7,22 +7,22 @@ using System.Threading.Tasks;
 using TestDapper.Helpers;
 using TestDapper.Models;
 
-namespace TestDapper.Data
+namespace TestDapper.Helpers
 {
 	public class GetConnection
 	{
 		private readonly IConfiguration _config;
-		private readonly IAESHelper _aesHelper;
-		public GetConnection(IConfiguration config, IAESHelper aesHelper) {
+				public GetConnection(IConfiguration config) {
 			_config = config;
-			_aesHelper = aesHelper;
+			//aes = aesHelper;
 		}
 		public  string applePenConnection()
 		{
+			var aes = new AESHelper(_config);
 			string applePenConnection = null;
 			var builder = new SqlConnectionStringBuilder(_config.GetConnectionString("applePenConnection"));
 			var result = new ResultModel();
-			result = _aesHelper.Decrypt(_config["DbPassword"]);
+			result = aes.Decrypt(_config["DbPassword"]);
 			if(result.r)
 			builder.Password = result.d.ToString();
 			applePenConnection = builder.ConnectionString;
@@ -31,10 +31,11 @@ namespace TestDapper.Data
 
 		public string manufactureConnection()
 		{
+			var aes = new AESHelper(_config);
 			string applePenConnection = null;
 			var builder = new SqlConnectionStringBuilder(_config.GetConnectionString("manufactureConnection"));
 			var result = new ResultModel();
-			result = _aesHelper.Decrypt(_config["DbPassword"]);
+			result = aes.Decrypt(_config["DbPassword"]);
 			if (result.r)
 				builder.Password = result.d.ToString();
 			applePenConnection = builder.ConnectionString;

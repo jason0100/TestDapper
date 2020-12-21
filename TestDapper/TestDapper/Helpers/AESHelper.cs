@@ -9,7 +9,7 @@ using TestDapper.Models;
 
 namespace TestDapper.Helpers
 {
-	public class AESHelper:IAESHelper
+	public class AESHelper
 	{
         private readonly IConfiguration _config;
         public AESHelper(IConfiguration config) {

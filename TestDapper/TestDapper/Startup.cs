@@ -15,61 +15,64 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Data.SqlClient;
 using TestDapper.Helpers;
 
+
 namespace TestDapper
 {
-    public class Startup
-    {
-        
-        private readonly GetConnection _conn;
-        public Startup(IConfiguration configuration, GetConnection conn)
-        {
-            Configuration = configuration;
-            _conn = conn;
-        }
+	public class Startup
+	{
+		private IConfiguration _config { get; }
+		//private GetConnection _conn;
 
-        public IConfiguration Configuration { get; }
+		public Startup(IConfiguration config
+			)
+		{
+			_config = config;
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
-        {
-		/*	var builder = new SqlConnectionStringBuilder(Configuration.GetConnectionString("applePenConnection"));
-			builder.Password = Configuration["TestDapper:DbPassword"];
-			applePenConnection = builder.ConnectionString;*/
+		}
 
-			services.AddControllers()
-                 .AddNewtonsoftJson(options =>
-                  options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-                    );
 
-     
-            services.AddDbContext<MyContext>(options =>
-					options.UseSqlServer(_conn.applePenConnection()));
 
-			services.AddDbContext<manufacture_Context>(options =>
-                   options.UseSqlServer(_conn.manufactureConnection()));
+		// This method gets called by the runtime. Use this method to add services to the container.
+		public void ConfigureServices(IServiceCollection services)
+		{
+				var conn = new GetConnection(_config);
+						
+				services.AddControllers()
+				.AddNewtonsoftJson(options =>
+					  options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+						);
 
-            services.AddTransient<GetConnection>();
-			services.AddScoped<IAESHelper, AESHelper>();
+				services.AddDbContext<MyContext>(options =>
+					options.UseSqlServer(conn.applePenConnection()));
+				//options.UseSqlServer(_config.GetConnectionString("applePenConnection")));
+				
+
+				services.AddDbContext<manufacture_Context>(options =>
+				options.UseSqlServer(conn.manufactureConnection()));
+				//options.UseSqlServer(_config.GetConnectionString("manufactureConnection")));
+
+			
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
-        {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+		{
+						
+			if (env.IsDevelopment())
+			{
+				app.UseDeveloperExceptionPage();
+			}
 
-            app.UseHttpsRedirection();
+			app.UseHttpsRedirection();
 
-            app.UseRouting();
+			app.UseRouting();
 
-            app.UseAuthorization();
+			app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-        }
-    }
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapControllers();
+			});
+		}
+	}
 }

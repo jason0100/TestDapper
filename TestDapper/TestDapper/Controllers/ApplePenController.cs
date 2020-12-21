@@ -25,14 +25,16 @@ namespace TestDapper.Controllers
     {
         private readonly IConfiguration _config;
         private readonly MyContext _DBContext;
-        private readonly GetConnection _conn;
-        
-        public ApplePenController(MyContext DBContext, IConfiguration config, GetConnection conn)
+       
+
+		public ApplePenController(MyContext DBContext, IConfiguration config
+			//, IGetConnection conn
+			)
         {
             _DBContext = DBContext;
             _config = config;
-            _conn = conn;
-        }
+			//_conn = conn;
+		}
 
 
         [HttpGet]
@@ -40,39 +42,43 @@ namespace TestDapper.Controllers
         {
             var sw = new Stopwatch();
             sw.Start();
-            var result = new ResultModel();
+			var result = new ResultModel();
 			//var query = _DBContext.applePens
-			//    .Include(a=>a.apple)
-			//    //.Select(a=>new { a,a.apple})
+			//	.Include(a => a.apple)
+			////.Select(a=>new { a,a.apple})
 			//.ToList();
-			//using (var conn = new SqlConnection(_config.GetConnectionString("applePenConnection")))
-			using (var conn = new SqlConnection(_conn.applePenConnection()))
-			{
-                conn.Open();
-                //string strSql = "SELECT TOP(10) * FROM applePens";
-                var sql = @"DECLARE @Id INT=1
+			var _conn = new GetConnection(_config);
+            //using (var conn = new SqlConnection(_config.GetConnectionString("applePenConnection")))
+            using (var conn = new SqlConnection(new GetConnection(_config).applePenConnection()))
+				{
+					conn.Open();
+					//string strSql = "SELECT TOP(10) * FROM applePens";
+					var sql = @"DECLARE @Id INT=1
 
-                    SELECT * 
-                    FROM applePens o 
-                    JOIN apples c
-                    ON  O.appleId=C.id
-                    WHERE o.id=@Id";
-                var p = new DynamicParameters();
-                p.Add("@Id", 1);
-				//var query = conn.Query<applePenModel, apple, applePenModel>(sql, (o, c) => { o.apple = c; return o; }).ToList();
-				//Query 方法的部分，我們必須按照我們 SELECT 欄位的順序告訴 Dapper 說依序對應的類別是哪些？
-				//以及最後要回傳的類別是哪一個？依這個例子，我們 SELECT 出來的欄位分別依序是對應到 applePenModel、apple 類別，
-				//最後要回傳的類別是 applePenModel。
+						SELECT * 
+						FROM applePens o 
+						JOIN apples c
+						ON  O.appleId=C.id
+						WHERE o.id=@Id";
+					var p = new DynamicParameters();
+					p.Add("@Id", 1);
+					//var query = conn.Query<applePenModel, apple, applePenModel>(sql, (o, c) => { o.apple = c; return o; }).ToList();
+					//Query 方法的部分，我們必須按照我們 SELECT 欄位的順序告訴 Dapper 說依序對應的類別是哪些？
+					//以及最後要回傳的類別是哪一個？依這個例子，我們 SELECT 出來的欄位分別依序是對應到 applePenModel、apple 類別，
+					//最後要回傳的類別是 applePenModel。
 
-				//var query = _DBContext.apples.AsNoTracking().ToList();
-				var sql2 = @"select * from apples where id<@id";
-				var query = conn.Query<applePenModel>(sql2,new { @id=100});
-				//var query = conn.Query<apple>(sql);
+					//var query = _DBContext.apples.AsNoTracking().ToList();
+					var sql2 = @"select * from apples where id<@id";
+					var query = conn.Query<applePenModel>(sql2,new { @id=100});
+					//var query = conn.Query<apple>(sql);
 
-				result.r = true;
-                result.d = query;
-            }
-            sw.Stop();
+					result.r = true;
+					result.d = query;
+				}
+            //result.r = true;
+            //result.d = query;
+            
+			sw.Stop();
             result.m = "Elapsed time =" + sw.ElapsedMilliseconds / 1000.0 + "s";
 
             return result;
@@ -84,8 +90,9 @@ namespace TestDapper.Controllers
         [HttpPost]
         public ResultModel Create(apple model)
         {
+            var _conn = new GetConnection(_config);
             var result = new ResultModel();
-            using (var conn = new SqlConnection(_config.GetConnectionString("applePenConnection")))
+            using (var conn = new SqlConnection(new GetConnection(_config).applePenConnection()))
             {
                 //INSERT DATA
                 var sql = @"INSERT INTO apples(name)
@@ -123,7 +130,8 @@ namespace TestDapper.Controllers
         public ResultModel CreateBatch(apple model)
         {
             var result = new ResultModel();
-            using (var conn = new SqlConnection(_config.GetConnectionString("applePenConnection")))
+            var _conn = new GetConnection(_config);
+            using (var conn = new SqlConnection(new GetConnection(_config).applePenConnection()))
             {
                 //INSERT DATA
                 var sql = @"INSERT INTO apples(name)
@@ -168,6 +176,7 @@ namespace TestDapper.Controllers
         public ResultModel Edit(appleForEdit model)
         {
             var result = new ResultModel();
+
             var existData = _DBContext.apples.FirstOrDefault(a => a.id == model.id);
             if (existData == null)
             {
@@ -175,7 +184,8 @@ namespace TestDapper.Controllers
                 result.m = "Data not exist.";
                 return result;
             }
-            using (var conn = new SqlConnection(_config.GetConnectionString("applePenConnection")))
+            var _conn = new GetConnection(_config);
+            using (var conn = new SqlConnection(new GetConnection(_config).applePenConnection()))
             {
 
                 var sql = @"UPDATE apples SET name=@name WHERE id=@id";
@@ -215,7 +225,8 @@ namespace TestDapper.Controllers
                 result.m = "Data not exist.";
                 return result;
             }
-            using (var conn = new SqlConnection(_config.GetConnectionString("applePenConnection")))
+            var _conn = new GetConnection(_config);
+            using (var conn = new SqlConnection(new GetConnection(_config).applePenConnection()))
             {
 
                 var sql = @"DELETE apples  WHERE id=@id";
@@ -250,15 +261,17 @@ namespace TestDapper.Controllers
             
             p.Add("@id", 2, DbType.Int32, direction: ParameterDirection.Input);
             p.Add("@name", DbType.String, direction: ParameterDirection.Output);
-            using (var conn = new SqlConnection(_config.GetConnectionString("applePenConnection")))
+
+            using (var conn = new SqlConnection(new GetConnection(_config).applePenConnection()))
             {
-                
-       
-                var rr = conn.Execute("取得姓名 @id,@name output",new { @id=2,@name=""});
-                result.d = p.Get<dynamic>("@name");//接收SP回傳值
+
+
+                //var rr = conn.Execute("取得姓名 @id,@name output", new { @id = 2, @name = "" });
+                var rr = conn.Execute("取得姓名", p, commandType: CommandType.StoredProcedure);
+				result.d =p.Get<dynamic>("@name");//接收SP回傳值
 
             }
-
+            result.r = true;
                 return result;
         }
 
@@ -268,10 +281,10 @@ namespace TestDapper.Controllers
             var result = new ResultModel();
             
 
-            using (var conn = GetConnection())
+            using (var conn = new SqlConnection(new GetConnection(_config).applePenConnection()))
             {
 
-                var dr = conn.ExecuteReader("select * from apples where id<100");
+                var dr = conn.ExecuteReader("select * from apples where id=2");
                 var dt = new DataTable();
                 dt.Load(dr);
                 return dt;
