@@ -23,7 +23,7 @@ namespace TestDapper.Helpers
 			string fileName = "c:\\TestDapper.json";
 			var myJsonString = File.ReadAllText(fileName);
 			var myJObject = JObject.Parse(myJsonString);
-			var pw=myJObject.SelectToken("DbPassword").Value<string>();
+			var pw=myJObject.SelectToken("TestDapper").Value<string>();
 
 			var aes = new AESHelper(_config);
 			string applePenConnection = null;
@@ -42,7 +42,7 @@ namespace TestDapper.Helpers
 			string fileName = "c:\\TestDapper.json";
 			var myJsonString = File.ReadAllText(fileName);
 			var myJObject = JObject.Parse(myJsonString);
-			var pw = myJObject.SelectToken("DbPassword").Value<string>();
+			var pw = myJObject.SelectToken("TestDapper").Value<string>();
 
 			var aes = new AESHelper(_config);
 			string applePenConnection = null;
