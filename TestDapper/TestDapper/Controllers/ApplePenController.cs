@@ -265,8 +265,6 @@ namespace TestDapper.Controllers
             using (var conn = new SqlConnection(new GetConnection(_config).applePenConnection()))
             {
 
-
-                //var rr = conn.Execute("取得姓名 @id,@name output", new { @id = 2, @name = "" });
                 var rr = conn.Execute("取得姓名", p, commandType: CommandType.StoredProcedure);
 				result.d =p.Get<dynamic>("@name");//接收SP回傳值
 
