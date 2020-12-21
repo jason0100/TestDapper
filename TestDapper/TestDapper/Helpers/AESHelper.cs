@@ -6,11 +6,12 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using TestDapper.Models;
-
+using NLog;
 namespace TestDapper.Helpers
 {
 	public class AESHelper
 	{
+        private static Logger logger = LogManager.GetCurrentClassLogger();
         private readonly IConfiguration _config;
         public AESHelper(IConfiguration config) {
             _config = config;
@@ -53,10 +54,10 @@ namespace TestDapper.Helpers
 
         public ResultModel Decrypt(string CipherText64)
         {
-            var CryptoKey = _config["key"];
+            var CryptoKey = _config["key2"];
             var result = new ResultModel();
-            try
-            {
+            //try
+            //{
                 //檢查參數
                 if (CipherText64 == null || CipherText64.Length <= 0)
                     throw new ArgumentNullException("沒有要解密的內容");
@@ -81,13 +82,14 @@ namespace TestDapper.Helpers
                     result.m = "Decryption Success";
                 }
 
-            }
+       /*     }
             catch (Exception e)
             {
                 Console.WriteLine(e.ToString());
                 result.r = false;
                 result.m = e.ToString();
-            }
+                logger.Error(e);
+            }*/
             return result;
         }
     }

@@ -21,7 +21,7 @@ namespace TestDapper.Controllers
 		public ResultModel Encrypt(string text)
 		{
 			var aes = new AESHelper(_config);
-			text = "t7689n";
+
 			var result = new ResultModel();
 			result.r = true;
 

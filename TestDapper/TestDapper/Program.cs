@@ -16,6 +16,7 @@ namespace TestDapper
 	{
 		public static void Main(string[] args)
 		{
+			NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
 			var host = CreateHostBuilder(args).Build();
 
 		
@@ -35,7 +36,7 @@ namespace TestDapper
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
 					webBuilder.UseStartup<Startup>();
-					//webBuilder.UseNLog();
+					webBuilder.UseNLog();
 				});
 	}
 }

@@ -14,7 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Data.SqlClient;
 using TestDapper.Helpers;
-
+using TestDapper.Extensions;
 
 namespace TestDapper
 {
@@ -57,10 +57,12 @@ namespace TestDapper
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-						
+			//app.UseExceptionHandler(new ExceptionHandlerOptions());
+			app.UseExceptionHandleMiddleware();
+			
 			if (env.IsDevelopment())
 			{
-				app.UseDeveloperExceptionPage();
+				//app.UseDeveloperExceptionPage();
 			}
 
 			app.UseHttpsRedirection();
@@ -73,6 +75,7 @@ namespace TestDapper
 			{
 				endpoints.MapControllers();
 			});
+			
 		}
 	}
 }

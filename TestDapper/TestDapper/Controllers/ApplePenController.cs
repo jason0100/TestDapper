@@ -16,6 +16,7 @@ using TestDapper.Models.Manufacture_card;
 using System.Diagnostics;
 using System.Data;
 using TestDapper.Helpers;
+using NLog;
 
 namespace TestDapper.Controllers
 {
@@ -25,9 +26,9 @@ namespace TestDapper.Controllers
     {
         private readonly IConfiguration _config;
         private readonly MyContext _DBContext;
-       
+        private static Logger logger = LogManager.GetCurrentClassLogger();
 
-		public ApplePenController(MyContext DBContext, IConfiguration config
+        public ApplePenController(MyContext DBContext, IConfiguration config
 			//, IGetConnection conn
 			)
         {
@@ -40,6 +41,7 @@ namespace TestDapper.Controllers
         [HttpGet]
         public ResultModel Get(int id)
         {
+            logger.Info("test");
             var sw = new Stopwatch();
             sw.Start();
 			var result = new ResultModel();
@@ -49,35 +51,41 @@ namespace TestDapper.Controllers
 			//.ToList();
 			var _conn = new GetConnection(_config);
             //using (var conn = new SqlConnection(_config.GetConnectionString("applePenConnection")))
-            using (var conn = new SqlConnection(new GetConnection(_config).applePenConnection()))
-				{
-					conn.Open();
-					//string strSql = "SELECT TOP(10) * FROM applePens";
-					var sql = @"DECLARE @Id INT=1
+            try
+            {
+                using (var conn = new SqlConnection(new GetConnection(_config).applePenConnection()))
+                {
+                    conn.Open();
+                    //string strSql = "SELECT TOP(10) * FROM applePens";
+                    var sql = @"DECLARE @Id INT=1
 
 						SELECT * 
 						FROM applePens o 
 						JOIN apples c
 						ON  O.appleId=C.id
 						WHERE o.id=@Id";
-					var p = new DynamicParameters();
-					p.Add("@Id", 1);
-					//var query = conn.Query<applePenModel, apple, applePenModel>(sql, (o, c) => { o.apple = c; return o; }).ToList();
-					//Query 方法的部分，我們必須按照我們 SELECT 欄位的順序告訴 Dapper 說依序對應的類別是哪些？
-					//以及最後要回傳的類別是哪一個？依這個例子，我們 SELECT 出來的欄位分別依序是對應到 applePenModel、apple 類別，
-					//最後要回傳的類別是 applePenModel。
+                    var p = new DynamicParameters();
+                    p.Add("@Id", 1);
+                    //var query = conn.Query<applePenModel, apple, applePenModel>(sql, (o, c) => { o.apple = c; return o; }).ToList();
+                    //Query 方法的部分，我們必須按照我們 SELECT 欄位的順序告訴 Dapper 說依序對應的類別是哪些？
+                    //以及最後要回傳的類別是哪一個？依這個例子，我們 SELECT 出來的欄位分別依序是對應到 applePenModel、apple 類別，
+                    //最後要回傳的類別是 applePenModel。
 
-					//var query = _DBContext.apples.AsNoTracking().ToList();
-					var sql2 = @"select * from apples where id<@id";
-					var query = conn.Query<applePenModel>(sql2,new { @id=100});
-					//var query = conn.Query<apple>(sql);
+                    //var query = _DBContext.apples.AsNoTracking().ToList();
+                    var sql2 = @"select * from apples where id<@id";
+                    var query = conn.Query<applePenModel>(sql2, new { @id = 100 });
+                    //var query = conn.Query<apple>(sql);
 
-					result.r = true;
-					result.d = query;
-				}
-            //result.r = true;
-            //result.d = query;
-            
+                    result.r = true;
+                    result.d = query;
+                }
+                //result.r = true;
+                //result.d = query;
+            }
+            catch (Exception e)
+            {
+                logger.Error(e);
+            }
 			sw.Stop();
             result.m = "Elapsed time =" + sw.ElapsedMilliseconds / 1000.0 + "s";
 
