@@ -54,7 +54,7 @@ namespace TestDapper.Helpers
 
         public ResultModel Decrypt(string CipherText64)
         {
-            var CryptoKey = _config["key2"];
+            var CryptoKey = _config["key"];
             var result = new ResultModel();
             //try
             //{
